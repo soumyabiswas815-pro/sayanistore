@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sayani Beauty Store</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:#fff0f6;
+}
+header{
+  background:linear-gradient(90deg,#ff5fa2,#ff1493);
+  color:white;
+  padding:20px;
+  text-align:center;
+}
+header button{
+  background:white;
+  color:#ff1493;
+  border:none;
+  padding:10px 20px;
+  border-radius:20px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+.products{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+.product{
+  background:white;
+  border-radius:12px;
+  box-shadow:0 8px 20px rgba(0,0,0,.1);
+  padding:15px;
+  text-align:center;
+}
+.product img{
+  width:100%;
+  height:200px;
+  object-fit:cover;
+  border-radius:10px;
+}
+.price{
+  color:#e91e63;
+  font-weight:bold;
+  font-size:18px;
+}
+.btn{
+  border:none;
+  padding:10px 14px;
+  border-radius:20px;
+  cursor:pointer;
+  margin:5px;
+}
+.cart-btn{background:#ff69b4;color:white;}
+.buy-btn{background:#4caf50;color:white;}
+
+#cart{
+  position:fixed;
+  right:0;
+  top:0;
+  width:320px;
+  height:100%;
+  background:white;
+  box-shadow:-5px 0 15px rgba(0,0,0,.3);
+  padding:15px;
+  display:none;
+  overflow:auto;
+  z-index:1000;
+}
+#cart h2{text-align:center;}
+.cart-item{
+  border-bottom:1px solid #ddd;
+  padding:8px 0;
+}
+.total{
+  font-weight:bold;
+  text-align:center;
+  margin:10px 0;
+}
+.checkout{
+  background:#ff1493;
+  color:white;
+  padding:10px;
+  border:none;
+  width:100%;
+  border-radius:20px;
+  cursor:pointer;
+}
+
+#paymentBox{
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,.7);
+  z-index:2000;
+}
+#paymentContent{
+  background:white;
+  width:90%;
+  max-width:400px;
+  margin:60px auto;
+  padding:20px;
+  border-radius:12px;
+  text-align:center;
+}
+#paymentContent button{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:20px;
+  border:none;
+  cursor:pointer;
+}
+footer{
+  background:#222;
+  color:white;
+  text-align:center;
+  padding:15px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Sayani Beauty Store</h1>
+<p>Premium Women Makeup & Fashion</p>
+<button onclick="toggleCart()">🛒 View Cart</button>
+</header>
+
+<div class="container">
+<div class="products" id="productList"></div>
+</div>
+
+<!-- CART -->
+<div id="cart">
+<h2>Your Cart</h2>
+<div id="cartItems"></div>
+<div class="total" id="total"></div>
+<button class="checkout" onclick="openPayment()">Proceed to Payment</button>
+<button onclick="toggleCart()">Close</button>
+</div>
+
+<!-- PAYMENT -->
+<div id="paymentBox">
+<div id="paymentContent">
+<h2>Select Payment Method</h2>
+
+<button onclick="showUPI()">📱 UPI QR</button>
+<button onclick="showBank()">🏦 Bank Transfer</button>
+<button onclick="showCOD()">💵 Cash on Delivery</button>
+
+<div id="payDetails" style="margin-top:15px;"></div>
+
+<button onclick="closePayment()">Cancel</button>
+</div>
+</div>
+
+<footer>
+© 2025 Sayani Beauty Store
+</footer>
+
+<script>
+const products=[
+{name:"Matte Lipstick",price:499,img:"image/MatteLipstick.jpg"},
+{name:"Liquid Foundation",price:899,img:"image/foundation.jpg"},
+{name:"Eyeshadow Palette",price:799,img:"image/eyeshadowpalate.jpg"},
+{name:"Makeup Brushes",price:699,img:"image/makeupbrushes.jpg"},
+{name:"Blush & Highlighter",price:599,img:"image/brushandhighliter.jpg"},
+{name:"Waterproof Mascara",price:399,img:"image/maskara.jpg"},
+{name:"Nail Polish Set",price:299,img:"image/nailpolish.jpg"},
+{name:"Face Primer",price:549,img:"image/faceprimer.jpg"},
+{name:"Luxury Perfume",price:1299,img:"image/luxuryperfume.jpg"},
+{name:"Makeup Organizer",price:999,img:"image/makeuporganizer.jpg"}
+];
+
+let cart=[];
+
+const list=document.getElementById("productList");
+products.forEach((p,i)=>{
+list.innerHTML+=`
+<div class="product">
+<img src="${p.img}">
+<h3>${p.name}</h3>
+<p class="price">₹${p.price}</p>
+<button class="btn cart-btn" onclick="addToCart(${i})">Add to Cart</button>
+<button class="btn buy-btn" onclick="buyNow(${i})">Buy Now</button>
+</div>`;
+});
+
+function toggleCart(){
+document.getElementById("cart").style.display=
+document.getElementById("cart").style.display==="block"?"none":"block";
+}
+
+function addToCart(i){
+cart.push(products[i]);
+renderCart();
+alert("Added to cart");
+}
+
+function renderCart(){
+let html="",sum=0;
+cart.forEach(p=>{
+html+=`<div class="cart-item">${p.name} - ₹${p.price}</div>`;
+sum+=p.price;
+});
+document.getElementById("cartItems").innerHTML=html;
+document.getElementById("total").innerHTML="Total: ₹"+sum;
+}
+
+function buyNow(i){
+cart=[products[i]];
+renderCart();
+toggleCart();
+}
+
+function openPayment(){
+document.getElementById("paymentBox").style.display="block";
+}
+
+function closePayment(){
+document.getElementById("paymentBox").style.display="none";
+document.getElementById("payDetails").innerHTML="";
+}
+
+function showUPI(){
+document.getElementById("payDetails").innerHTML=`
+<h3>Scan & Pay</h3>
+<img src="image/upi-qr.png" width="200">
+<p>UPI ID: 8250982149@ybl</p>
+<button onclick="success()">I Have Paid</button>`;
+}
+
+function showBank(){
+document.getElementById("payDetails").innerHTML=`
+<h3>Bank Transfer</h3>
+<p>Account Name: Sayani Beauty Store</p>
+<p>Account No: 1234567890</p>
+<p>IFSC: SBIN0000123</p>
+<button onclick="success()">I Have Transferred</button>`;
+}
+
+function showCOD(){
+document.getElementById("payDetails").innerHTML=`
+<h3>Cash on Delivery</h3>
+<p>Pay when product arrives</p>
+<button onclick="success()">Confirm Order</button>`;
+}
+
+function success(){
+alert("Payment Successful 🎉\nOrder Confirmed!");
+cart=[];
+renderCart();
+closePayment();
+toggleCart();
+}
+</script>
+
+</body>
+</html>
